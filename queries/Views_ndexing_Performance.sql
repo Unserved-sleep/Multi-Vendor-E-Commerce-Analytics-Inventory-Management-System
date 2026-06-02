@@ -110,3 +110,52 @@ JOIN products
 ON cart_items.product_id=products.product_id
 WHERE carts.expiry_time<NOW()-INTERVAL '24 hours'
 GROUP BY carts.cart_id,users.email,carts.expiry_time;
+
+--Q6
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+CREATE INDEX idx_payments_order_id ON payments(order_id);
+CREATE INDEX idx_inventory_product_id ON inventory(product_id);
+CREATE INDEX idx_inventory_warehouse_id ON inventory(warehouse_id);
+
+--Q7
+CREATE INDEX idx_orders_customer_date ON orders(customer_id,order_date DESC);
+
+--Q8
+CREATE INDEX idx_order_items_covering ON order_items(order_id)
+INCLUDE(product_id,quantity,unit_price);
+
+--Q9
+EXPLAIN ANALYZE
+SELECT * FROM seller_dashboard_view;
+
+--Q10
+CREATE TABLE orders_partitioned(
+    LIKE orders
+) PARTITION BY RANGE(order_date);
+
+CREATE TABLE orders_2024
+    PARTITION OF orders_partitioned
+        FOR VALUES FROM ('2024-01-01 00:00:00')
+        TO ('2025-01-01 00:00:00');
+
+CREATE TABLE orders_2025
+    PARTITION OF orders_partitioned
+        FOR VALUES FROM ('2025-01-01 00:00:00')
+        TO ('2026-01-01 00:00:00');
+
+CREATE TABLE orders_2026
+    PARTITION OF orders_partitioned
+        FOR VALUES FROM ('2026-01-01 00:00:00')
+        TO ('2027-01-01 00:00:00');
+
+
+INSERT INTO orders_partitioned
+SELECT * FROM orders;
+
+EXPLAIN ANALYZE
+SELECT *
+FROM orders_partitioned
+WHERE order_date>='2026-01-01'
+  AND order_date<'2027-01-01';
