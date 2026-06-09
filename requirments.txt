@@ -1,5 +1,0 @@
-faker
-psycopg[binary]
-tqdm
-numpy
-python-dotenv
