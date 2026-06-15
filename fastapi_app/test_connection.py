@@ -1,0 +1,16 @@
+# fastapi_app/test_connection.py
+
+from fastapi_app.database import engine
+
+try:
+
+    connection = engine.connect()
+
+    print("Database Connected Successfully!")
+
+    connection.close()
+
+except Exception as e:
+
+    print("Connection Failed")
+    print(e)
